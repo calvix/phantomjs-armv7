@@ -1,0 +1,35 @@
+FROM debian:stretch
+
+ENV PHANTOM_JS_LINK "https://github.com/fg2it/phantomjs-on-raspberry/releases/download/v2.1.1-jessie-stretch-arm64/phantomjs"
+ENV LIBSSL_1_0_0_LINK "http://ftp.cz.debian.org/debian/pool/main/o/openssl1.0/libssl1.0.2_1.0.2u-1~deb9u1_arm64.deb"
+
+
+# Install runtime dependencies
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        bzip2 \
+        libfontconfig \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+ADD ./tini /tini
+RUN chmod +x /tini
+
+RUN set -x  \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends curl wget sqlite libicu57 libsqlite3-0 \
+ && curl -L ${PHANTOM_JS_LINK} -o /usr/local/bin/phantomjs  \
+ && mkdir /tmp/libssl \
+ && cd /tmp/libssl \
+ && wget ${LIBSSL_1_0_0_LINK} \
+ && dpkg -i libssl1.0.2_1.0.2u-1~deb9u1_arm64.deb \
+ && chmod +x /usr/local/bin/phantomjs \
+ && rm -rf /tmp/* /var/lib/apt/lists/* \
+ && cd / \
+ && useradd --system --uid 52379 -m --shell /usr/sbin/nologin phantomjs \
+ && su phantomjs -s /bin/sh -c "phantomjs --version"
+
+
+USER phantomjs
+

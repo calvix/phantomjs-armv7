@@ -1,0 +1,3 @@
+#!/bin/bash
+sudo docker run -it -e SLIMERJSLAUNCHER -v /opt/firefox:/opt/firefox -v /phantomjs:/phantomjs -v /home/waxik:/home/waxik calvix/phantomjs:2.2.1-armv7 phantomjs $@
+
